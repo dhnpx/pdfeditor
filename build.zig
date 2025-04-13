@@ -3,6 +3,9 @@ const std = @import("std");
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
 // runner.
+
+const CFlags = &.{};
+
 pub fn build(b: *std.Build) void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
@@ -15,8 +18,6 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const dvui_dep = b.dependency("dvui", .{ .target = target, .optimize = optimize, .backend = .sdl, .sdl3 = true });
-
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
     const exe = b.addExecutable(.{
@@ -26,7 +27,20 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const dvui_dep = b.dependency("dvui", .{
+        .target = target,
+        .optimize = optimize,
+        .sdl3 = true,
+    });
     exe.root_module.addImport("dvui", dvui_dep.module("dvui_sdl"));
+
+    exe.addIncludePath(b.path("include"));
+
+    exe.addObjectFile(b.path("libs/mupdf/libmupdf-glut.a"));
+    exe.addObjectFile(b.path("libs/mupdf/libmupdf-pkcs7.a"));
+    exe.addObjectFile(b.path("libs/mupdf/libmupdf-third.a"));
+    exe.addObjectFile(b.path("libs/mupdf/libmupdf-threads.a"));
+    exe.addObjectFile(b.path("libs/mupdf/libmupdf.a"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
@@ -55,5 +69,4 @@ pub fn build(b: *std.Build) void {
     // This will evaluate the `run` step rather than the default, which is "install".
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
-
 }
