@@ -11,7 +11,7 @@ comptime {
     std.debug.assert(@hasDecl(Backend, "SDLBackend"));
 }
 
-const window_icon_png = @embedFile("pdf.png");
+const window_icon_png = @embedFile("assets/pdf.png");
 
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
