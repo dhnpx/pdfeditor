@@ -24,7 +24,7 @@ pub fn image(file: [:0]const u8) !PdfImage {
     // testing
     const scale: f32 = 1.0;
     const ctm = c.fz_scale(scale,scale);
-
+ 
 
 
 
@@ -32,6 +32,15 @@ pub fn image(file: [:0]const u8) !PdfImage {
     std.debug.print("ctm created\n", .{});
     //std.debug.print("ctm: {c}\n", .{ctm});
     const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, null, 0);
+
+    
+    // figure out what these are 
+    //const data = c.fz_pixmap_samples(ctx, pix);
+    const width = c.fz_pixmap_width(ctx, pix);
+    const height = c.fz_pixmap_height(ctx, pix); 
+    std.debug.print("Width: {d}\n", .{width});
+    std.debug.print("Height: {d}\n", .{height});
+    //std.debug.print("Data: {d}\n", .{data});
 
     return PdfImage{
         .data = c.fz_pixmap_samples(ctx, pix),
