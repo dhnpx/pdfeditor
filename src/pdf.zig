@@ -28,7 +28,7 @@ pub fn image(file: [:0]const u8) !PdfImage {
     //const ctm: c.fz_matrix = undefined;
     std.debug.print("ctm created\n", .{});
     //std.debug.print("ctm: {c}\n", .{ctm});
-    const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, null, 1);
+    const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, c.fz_device_rgb(ctx), 1);
 
     // figure out what these are
     //const data = c.fz_pixmap_samples(ctx, pix);
