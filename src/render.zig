@@ -7,7 +7,6 @@ const Backend = dvui.backend;
 //just test bud
 const std = @import("std");
 
-
 // // both dvui and SDL drawing
 pub fn gui_frame() !void {
     const backend = state.g_backend orelse return;
@@ -21,18 +20,17 @@ pub fn gui_frame() !void {
             defer fw.deinit();
             if (try dvui.menuItemLabel(@src(), "Open", .{}, .{}) != null) {
                 //before
-                std.debug.print("Before\n",.{});
-                
+                std.debug.print("Before\n", .{});
+
                 const filename = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
-                 
-                std.debug.print("After\n",.{});
+
+                std.debug.print("After\n", .{});
                 if (filename != null) {
-                    std.debug.print("filename is not equal to null\n",.{});
-                   
-                 
+                    std.debug.print("filename is not equal to null\n", .{});
+
                     const image = try pdf.image(filename.?);
-                    const texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.linear);
-                    try dvui.renderTexture(texture, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(image.width), .h = @floatFromInt(image.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = null, .debug = true });
+                    const texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.nearest);
+                    try dvui.renderTexture(texture, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(image.width), .h = @floatFromInt(image.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = 1, .y = 1 }, .debug = true });
                 }
                 m.close();
             }
