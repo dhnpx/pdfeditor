@@ -6,7 +6,7 @@ pub const PdfImage = struct {
     height: c_int,
 };
 
-pub fn image(file: [:0]const u8) !PdfImage {
+pub fn init(file: [:0]const u8) !PdfImage {
     const c_file: [*c]const u8 = file.ptr;
 
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED);

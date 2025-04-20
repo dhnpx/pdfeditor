@@ -43,6 +43,7 @@ pub fn main() !void {
 
     // init dvui Window (maps onto a single OS window)
     var win = try dvui.Window.init(@src(), gpa, backend.backend(), .{});
+    state.g_win = win;
     defer win.deinit();
 
     main_loop: while (true) {
