@@ -9,9 +9,10 @@ const std = @import("std");
 // // both dvui and SDL drawing
 pub fn gui_frame() !void {
     //const backend = state.g_backend orelse return;
-    var win = state.g_win orelse return;
-    var pixmap: pdf.PdfImage = undefined;
-    var texture: dvui.Texture = undefined;
+    //var win = state.g_win orelse return;
+    var pixmap: ?pdf.PdfImage = null;
+    var texture: ?dvui.Texture = null;
+    var filename: [:0]const u8 = undefined;
 
     {
         var m = try dvui.menu(@src(), .horizontal, .{ .background = true, .expand = .horizontal });
@@ -21,25 +22,18 @@ pub fn gui_frame() !void {
             var fw = try dvui.floatingMenu(@src(), r, .{});
             defer fw.deinit();
             if (try dvui.menuItemLabel(@src(), "Open", .{}, .{}) != null) {
-                //before
-                std.debug.print("Before\n", .{});
+                filename = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
 
-                const filename = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
-
-                std.debug.print("After\n", .{});
                 if (filename != null) {
-                    std.debug.print("filename is not equal to null\n", .{});
+                    //    std.debug.print("filename is not equal to null\n", .{});
 
-                    pixmap = try pdf.init(filename.?);
-
-                    texture = dvui.textureCreate(pixmap.data, @intCast(pixmap.width), @intCast(pixmap.height), enums.TextureInterpolation.nearest);
-
-                    var frame_box = try dvui.box(@src(), .horizontal, .{ .min_size_content = .{ .w = 50, .h = 50 } });
-
-                    try dvui.renderTexture(texture, frame_box.data().contentRectScale(), .{ .debug = true });
-                    win.refreshWindow(@src(), win.captureID);
-                    frame_box.deinit();
-                    // try dvui.renderTexture(texture, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(pixmap.width), .h = @floatFromInt(pixmap.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = 1, .y = 1 }, .debug = true });
+                    // texture = dvui.textureCreate(pixmap.data, @intCast(pixmap.width), @intCast(pixmap.height), enums.TextureInterpolation.nearest);
+                    //
+                    // var frame_box = try dvui.box(@src(), .horizontal, .{ .min_size_content = .{ .w = 50, .h = 50 } });
+                    //
+                    // try dvui.renderTexture(texture, frame_box.data().contentRectScale(), .{ .debug = true });
+                    // frame_box.deinit();
+                    // // try dvui.renderTexture(texture, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(pixmap.width), .h = @floatFromInt(pixmap.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = 1, .y = 1 }, .debug = true });
                 }
                 m.close();
             }
@@ -55,6 +49,14 @@ pub fn gui_frame() !void {
             _ = try dvui.menuItemLabel(@src(), "Dummy Long", .{}, .{ .expand = .horizontal });
             _ = try dvui.menuItemLabel(@src(), "Dummy Super Long", .{}, .{ .expand = .horizontal });
         }
+    }
+
+    if (filename != null) {
+        pixmap = try pdf.init(filename);
+        texture = dvui.textureCreate(pixmap.?.data, @intCast(pixmap.?.width), @intCast(pixmap.?.height), enums.TextureInterpolation.nearest);
+        var frame_box = try dvui.box(@src(), .horizontal, .{ .min_size_content = .{ .w = 500, .h = 500 } });
+
+        try dvui.renderTexture(texture.?, frame_box.data().contentRectScale(), .{ .debug = true });
     }
 
     var scroll = try dvui.scrollArea(@src(), .{ .vertical = .auto }, .{ .expand = .both, .color_fill = .{ .name = .fill_window } });
