@@ -9,8 +9,6 @@ pub const PdfImage = struct {
 };
 
 pub fn init(file: [:0]const u8) !PdfImage {
-    //const c_file: [*c]const u8 = file.ptr;
-
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Filed to create mupdf conext\n", .{});
         return errors.DocumentError.FailedToCreateContext;
@@ -19,6 +17,7 @@ pub fn init(file: [:0]const u8) !PdfImage {
 
     c.fz_register_document_handlers(ctx);
     const page_num: u16 = 0;
+
     //other test
     const doc = c.fz_open_document(ctx, file.ptr) orelse {
         std.debug.print("Failed to open document: {s}\n", .{c.fz_caught_message(ctx)});
@@ -27,14 +26,28 @@ pub fn init(file: [:0]const u8) !PdfImage {
     errdefer c.fz_drop_document(ctx, doc);
     std.debug.print("File Path: {s}\n", .{file});
 
+    //const page_count = @as(u16, @intCast(c.fz_count_pages(ctx, doc)));
     const page = c.fz_load_page(ctx, doc, page_num);
     defer c.fz_drop_page(ctx, page);
-    const scale: f32 = 1.0;
-    const ctm = c.fz_scale(scale, scale);
+
+    //const bound = c.fz_bound_page(ctx, page);
+
+    const view_width: f32 = 500;
+    const view_height: f32 = 500;
+
+    const bbox = c.fz_make_irect(
+        0,
+        0,
+        @intFromFloat(view_width),
+        @intFromFloat(view_height),
+    );
+
+    //const scale: f32 = 1.0;
 
     std.debug.print("ctm created\n", .{});
-    const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, c.fz_device_rgb(ctx), 1);
-    defer c.fz_drop_pixmap(ctx, pix);
+    const pix = c.fz_new_pixmap_with_bbox(ctx, c.fz_device_rgb(ctx), bbox, null, 1);
+
+    //const ctm = c.fz_scale(scale, scale);
 
     const data = c.fz_pixmap_samples(ctx, pix);
     const width = c.fz_pixmap_width(ctx, pix);

@@ -4,3 +4,7 @@ pub const DocumentError = error{
     InvalidPageNumber,
     UnsupportedFileFormat,
 };
+
+pub const RenderError = error{
+    FailedToCreatePixmap,
+};
