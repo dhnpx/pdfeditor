@@ -9,3 +9,6 @@ pub var scale_val: f32 = 1.0;
 pub var show_dialog_outside_frame: bool = false;
 pub var g_backend: ?Backend = null;
 pub var g_win: ?Window = null;
+pub var loaded_texture: ?dvui.Texture = null;
+pub var height: u32 = 0;
+pub var width: u32 = 0;
