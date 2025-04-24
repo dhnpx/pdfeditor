@@ -19,3 +19,4 @@ pub var ctx: ?*c.fz_context = null;
 pub var loaded_texture: ?dvui.Texture = null;
 pub var height: u32 = 0;
 pub var width: u32 = 0;
+pub var page_number: u16 = 0;

@@ -27,9 +27,14 @@ pub fn init(file: [:0]const u8) !PdfImage {
     };
     errdefer c.fz_drop_document(ctx, doc);
     state.doc = doc;
-
-    const page_num: u16 = 0;
-    const page = c.fz_load_page(ctx, doc, page_num);
+    const total_page: u16 = @intCast(c.fz_count_pages(ctx,doc));
+    //const page_num: u16 = 0;
+    for(0..total_page) |i|{
+        std.debug.print("page {} of {}\n", .{i+1,total_page});
+}
+    
+        
+    const page = c.fz_load_page(ctx, doc, state.page_number);
 
     const scale: f32 = 1.0;
     const ctm = c.fz_scale(scale, scale);
