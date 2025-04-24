@@ -8,3 +8,7 @@ pub const DocumentError = error{
 pub const RenderError = error{
     FailedToCreatePixmap,
 };
+
+pub const WriterError = error{
+    FailedToCreateWriter,
+};
