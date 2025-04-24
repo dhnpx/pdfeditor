@@ -51,14 +51,21 @@ pub fn gui_frame() !void {
             _ = try dvui.menuItemLabel(@src(), "Dummy Super Long", .{}, .{ .expand = .horizontal });
         }
     }
-
-    var scroll = try dvui.scrollArea(@src(), .{}, .{ .expand = .both, .color_fill = .{ .name = .fill_window } });
+    var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
+    var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
     defer scroll.deinit();
 
     // render texture maybe
     if (state.loaded_texture) |tex| {
         std.debug.print("Ok now so like ok dude\n", .{});
-
-        try dvui.renderTexture(tex, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = true });
+        const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
+        const display_height: f32 = @as(f32, @floatFromInt(tex.height)) * scale;
+        const drawRect = dvui.RectScale{ .r = .{
+            .x = scroll.data().contentRect().x,
+            .y = scroll.data().contentRect().y,
+            .w = scroll.data().contentRect().w,
+            .h = display_height,
+        }, .s = 1.0 };
+        try dvui.renderTexture(tex, drawRect, .{ .debug = true });
     }
 }

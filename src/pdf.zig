@@ -2,6 +2,7 @@ const c = @cImport(@cInclude("mupdf/fitz.h"));
 const std = @import("std");
 const e = @import("errors.zig");
 const state = @import("state.zig");
+const ArrayList = std.ArrayList;
 
 pub const PdfImage = struct {
     data: [*]u8,
