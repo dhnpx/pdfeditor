@@ -16,6 +16,7 @@ pub var g_win: ?Window = null;
 pub var doc: ?*c.fz_document = null;
 pub var ctx: ?*c.fz_context = null;
 
+pub var file: ?[:0]u8 = null;
 pub var loaded_texture: ?dvui.Texture = null;
 pub var height: u32 = 0;
 pub var width: u32 = 0;

@@ -1,8 +1,10 @@
-const c = @cImport(@cInclude("mupdf/fitz.h"));
 const std = @import("std");
+const dvui = @import("dvui");
+const ArrayList = std.ArrayList;
+
+const c = @cImport(@cInclude("mupdf/fitz.h"));
 const e = @import("errors.zig");
 const state = @import("state.zig");
-const ArrayList = std.ArrayList;
 
 pub const PdfImage = struct {
     data: [*]u8,
@@ -10,7 +12,7 @@ pub const PdfImage = struct {
     height: c_int,
 };
 
-pub fn init(file: [:0]const u8) !PdfImage {
+pub fn init(file: [:0]const u8, vp: dvui.RecScale) !PdfImage {
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
