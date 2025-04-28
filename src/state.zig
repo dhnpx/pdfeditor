@@ -20,3 +20,17 @@ pub var loaded_texture: ?dvui.Texture = null;
 pub var height: u32 = 0;
 pub var width: u32 = 0;
 pub var page_number: u16 = 0;
+pub var max_page: u16 = 0;
+pub var loaded_texture1: ?dvui.Texture = null;
+pub var loaded_texture2: ?dvui.Texture = null;
+pub var loaded_texture3: ?dvui.Texture = null;
+pub var loaded_texture4: ?dvui.Texture = null;
+pub var loaded_texture5: ?dvui.Texture = null;
+pub var loaded_texture6: ?dvui.Texture = null;
+pub var loaded_texture7: ?dvui.Texture = null;
+pub var loaded_texture8: ?dvui.Texture = null;
+pub var loaded_texture9: ?dvui.Texture = null;
+pub var loaded_texture10: ?dvui.Texture = null;
+pub var loaded_texture11: ?dvui.Texture = null;
+pub var loaded_texture12: ?dvui.Texture = null;
+

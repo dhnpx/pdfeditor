@@ -2,6 +2,10 @@ const c = @cImport(@cInclude("mupdf/fitz.h"));
 const std = @import("std");
 const e = @import("errors.zig");
 const state = @import("state.zig");
+const dvui = @import("dvui");
+const enums = dvui.enums;
+
+
 
 pub const PdfImage = struct {
     data: [*]u8,
@@ -29,10 +33,10 @@ pub fn init(file: [:0]const u8) !PdfImage {
     state.doc = doc;
     const total_page: u16 = @intCast(c.fz_count_pages(ctx,doc));
     //const page_num: u16 = 0;
-    for(0..total_page) |i|{
-        std.debug.print("page {} of {}\n", .{i+1,total_page});
-}
-    
+    state.max_page = total_page;
+
+
+
         
     const page = c.fz_load_page(ctx, doc, state.page_number);
 
@@ -48,6 +52,22 @@ pub fn init(file: [:0]const u8) !PdfImage {
     std.debug.print("Width: {d}\n", .{width});
     std.debug.print("Height: {d}\n", .{height});
 
+    for(0..total_page) |i|{
+        std.debug.print("page {} of {}\n", .{i+1,total_page});
+        if(i == 0){
+        //state.loaded_texture = dvui.textureCreate(data, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+        }
+        if(i == 1){
+            const page2 = c.fz_load_page(ctx, doc, 1);
+            const pix2 = c.fz_new_pixmap_from_page(ctx,page2,ctm,c.fz_device_rgb(ctx),1);
+            const data2 = c.fz_pixmap_samples(ctx, pix2);
+            state.loaded_texture2 = dvui.textureCreate(data2, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+        }
+        if(i == 2){
+            state.loaded_texture3 = dvui.textureCreate(data, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+        }
+        }
+    
     return PdfImage{
         .data = data,
         .width = width,

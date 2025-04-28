@@ -52,6 +52,11 @@ pub fn gui_frame() !void {
         }
     }
 
+    //const width2: u32 = state.width + 10;
+    //const fwidth2: f32 = @floatFromInt(width2);
+    const height2: u32 = state.height + 10;
+    const fheight2: f32 = @floatFromInt(height2);
+
     var scroll = try dvui.scrollArea(@src(), .{}, .{ .expand = .both, .color_fill = .{ .name = .fill_window } });
     defer scroll.deinit();
 
@@ -60,5 +65,12 @@ pub fn gui_frame() !void {
         std.debug.print("Ok now so like ok dude\n", .{});
 
         try dvui.renderTexture(tex, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = true });
+    //var scrollbar = try dvui.ScrollBarWidget();
+
+
+    }
+    if (state.loaded_texture2) |text| {
+        std.debug.print("2nd texture\n", .{});
+        try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = true });
     }
 }
