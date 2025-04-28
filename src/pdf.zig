@@ -12,7 +12,7 @@ pub const PdfImage = struct {
     height: c_int,
 };
 
-pub fn init(file: [:0]const u8, vp: dvui.RecScale) !PdfImage {
+pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -34,10 +34,22 @@ pub fn init(file: [:0]const u8, vp: dvui.RecScale) !PdfImage {
     const page_num: u16 = 0;
     const page = c.fz_load_page(ctx, doc, page_num);
 
-    const scale: f32 = 1.0;
+    var bounds = c.fz_bound_page(ctx, page);
+    const scale = vp.w / bounds.x1;
     const ctm = c.fz_scale(scale, scale);
+    bounds = c.fz_transform_rect(bounds, ctm);
 
-    const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, c.fz_device_rgb(ctx), 1);
+    const colorspace = c.fz_device_rgb(ctx);
+
+    const bbox = c.fz_make_irect(
+        0,
+        0,
+        @intFromFloat(bounds.x1),
+        @intFromFloat(bounds.y1),
+    );
+
+    const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
+    defer c.fz_drop_pixmap(ctx, pix);
 
     const data = c.fz_pixmap_samples(ctx, pix);
     const width = c.fz_pixmap_width(ctx, pix);
