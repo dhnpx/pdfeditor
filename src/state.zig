@@ -22,5 +22,5 @@ pub var ctx: ?*c.fz_context = null;
 
 pub var file: ?[:0]const u8 = null;
 pub var loaded_texture: ?dvui.Texture = null;
-pub var height: u32 = 0;
-pub var width: u32 = 0;
+pub var height: f32 = 0;
+pub var width: f32 = 0;

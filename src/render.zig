@@ -57,22 +57,22 @@ pub fn gui_frame() !void {
         std.debug.print("File name: {s}", .{state.file.?});
         const viewport = scroll.data().contentRect();
         const image = try pdf.init(state.file.?, viewport);
-        state.height = @intCast(image.height);
-        state.width = @intCast(image.width);
+        state.height = @as(f32, @floatFromInt(image.height));
+        state.width = @as(f32, @floatFromInt(image.width));
         state.loaded_texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.nearest);
     }
 
     // render texture maybe
     if (state.loaded_texture) |tex| {
         std.debug.print("Ok now so like ok dude\n", .{});
-        const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
+        //const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
         //const display_height: f32 = @round(@as(f32, @floatFromInt(tex.height)) * scale);
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
             .w = scroll.data().contentRect().w,
-            .h = @as(f32, @floatFromInt(state.height)),
-        }, .s = scale };
+            .h = state.height,
+        }, .s = 1 };
         try dvui.renderTexture(tex, drawRect, .{ .debug = true });
     }
 }

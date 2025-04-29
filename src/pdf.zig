@@ -41,11 +41,20 @@ pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
 
     const colorspace = c.fz_device_rgb(ctx);
 
+    const view_width = @max(1, @min(
+        scale * bounds.x1,
+        vp.w,
+    ));
+    const view_height = @max(1, @min(
+        scale * bounds.y1,
+        vp.h,
+    ));
+
     const bbox = c.fz_make_irect(
         0,
         0,
-        @intFromFloat(bounds.x1),
-        @intFromFloat(bounds.y1),
+        @intFromFloat(view_width),
+        @intFromFloat(view_height),
     );
 
     const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
