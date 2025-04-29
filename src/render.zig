@@ -80,7 +80,7 @@ pub fn gui_frame() !void {
 //    const off = sd.scroll();     // how far the user has scrolled
     
     t12.deinit();
-    var t12 = try dvui.texture
+//    var t12 = try dvui.texture
    
     var pageBox = try dvui.box(
     @src(),
