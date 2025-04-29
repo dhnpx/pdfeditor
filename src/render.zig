@@ -8,13 +8,7 @@ const Backend = dvui.backend;
 const std = @import("std");
 
 
-
 // // both dvui and SDL drawing
-
-
-
-
-
 pub fn gui_frame() !void {
     //const backend = state.g_backend orelse return;
     {
@@ -59,29 +53,23 @@ pub fn gui_frame() !void {
         }
     }
 
-    //const width2: u32 = state.width + 10;
-    //const fwidth2: f32 = @floatFromInt(width2);
+    const width2: u32 = state.width + 10;
+    const fwidth2: f32 = @floatFromInt(width2);
     const height2: u32 = state.height + 10;
     const fheight2: f32 = @floatFromInt(height2);
-
-    //var scroll = try dvui.scrollArea(@src(), .{ .vertical_bar = .show}, .{ .expand = .both, .color_fill = .{ .name = .fill_window } });
-    //defer scroll.deinit();
-    //var scroll = try dvui.scrollArea( @src(), .{}, .{ .expand = .both});
     var scroll = try dvui.scrollArea( @src(), .{ .vertical_bar = .show}, .{ .expand = .both, .min_size_content = .{ .h = @floatFromInt(100000) , .w = @floatFromInt(100000) } }, );
     defer scroll.deinit();
     var t12 = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal });
     try t12.addText(
     \\DVUI
     ,.{});
-    try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});
-    // get the current viewport (in window‐coords) and scroll‐offset (in content‐coords):
- //   const sd = scroll.data();
-    //const vr = sd.viewRect();    // where in window to draw
-//    const off = sd.scroll();     // how far the user has scrolled
-    
+    try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
     t12.deinit();
-//    var t12 = try dvui.texture
+    //var t12 = try dvui.texture
    
+    var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
+    defer pageBox.deinit();
+
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
@@ -94,7 +82,9 @@ pub fn gui_frame() !void {
 
     // render texture maybe
     if (state.loaded_texture) |tex| {
-        std.debug.print("Ok now so like ok dude\n", .{});
+    std.debug.print("Ok now so like ok dude\n", .{});
+
+
         try dvui.renderTexture(tex, drawRect, .{ .debug = false });
         //try dvui.renderTexture(tex, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
     } 
