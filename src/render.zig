@@ -91,11 +91,19 @@ pub fn gui_frame() !void {
         try dvui.renderTexture(tex, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})){
             std.debug.print("Before\n", .{});
+            if(state.current_page_number > 0){
+                state.current_page_number = state.current_page_number - 1;
+                std.debug.print("Page Number: {d} \n", .{state.current_page_number});
+            }
             state.loaded_texture = state.loaded_texture1; 
 
         }
         if (try dvui.button(@src(),"Next",.{}, .{})){
             std.debug.print("Next\n", .{});
+            state.current_page_number = state.current_page_number + 1;
+            if( state.current_page_number < state.max_page) {
+                std.debug.print("Page Number: {d} \n", .{state.current_page_number});
+            }
             state.loaded_texture = state.loaded_texture2;
         }
 
