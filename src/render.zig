@@ -30,6 +30,7 @@ pub fn gui_frame() !void {
                     state.height = @intCast(image.height);
                     state.width = @intCast(image.width);
                     state.loaded_texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.nearest);
+                    state.loaded_texture1 = state.loaded_texture;
                 } else {
                     std.debug.print("File is null\n", .{});
                 }
@@ -53,47 +54,60 @@ pub fn gui_frame() !void {
         }
     }
 
-    const width2: u32 = state.width + 10;
-    const fwidth2: f32 = @floatFromInt(width2);
-    const height2: u32 = state.height + 10;
-    const fheight2: f32 = @floatFromInt(height2);
+//    const width2: u32 = state.width + 10;
+//    const fwidth2: f32 = @floatFromInt(width2);
+//    const height2: u32 = state.height + 10;
+//    const fheight2: f32 = @floatFromInt(height2);
     var scroll = try dvui.scrollArea( @src(), .{ .vertical_bar = .show}, .{ .expand = .both, .min_size_content = .{ .h = @floatFromInt(100000) , .w = @floatFromInt(100000) } }, );
     defer scroll.deinit();
-    var t12 = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal });
-    try t12.addText(
-    \\DVUI
-    ,.{});
-    try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
-    t12.deinit();
+    //var t12 = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal });
+    //try t12.addText(
+    //\\DVUI
+    //,.{});
+    //try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
+    //t12.deinit();
     //var t12 = try dvui.texture
-   
-    var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
+    var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
+    
+    //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
     defer pageBox.deinit();
-
+    
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
-            .w = scroll.data().contentRect().w,
+            .w = @floatFromInt(state.width),
+            //.w = scroll.data().contentRect().w,
             .h = @floatFromInt(state.height),
         }, .s = state.scale_val};
     
 
-    
-
+       
     // render texture maybe
     if (state.loaded_texture) |tex| {
     std.debug.print("Ok now so like ok dude\n", .{});
-
-
+    
+        var hbox = try dvui.box(@src(), .horizontal, .{});
+        defer hbox.deinit();
         try dvui.renderTexture(tex, drawRect, .{ .debug = false });
+        if (try dvui.button(@src(), "Previous", .{}, .{})){
+            std.debug.print("Before\n", .{});
+            state.loaded_texture = state.loaded_texture1; 
+
+        }
+        if (try dvui.button(@src(),"Next",.{}, .{})){
+            std.debug.print("Next\n", .{});
+            state.loaded_texture = state.loaded_texture2;
+        }
+
+
         //try dvui.renderTexture(tex, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
     } 
-    if (state.loaded_texture2) |text| {
-        std.debug.print("2nd texture\n", .{});
-        try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
+    //if (state.loaded_texture2) |text| {
+      //  std.debug.print("2nd texture\n", .{});
+        //try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
 
 
        // try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = scroll.data().contentRect().w, .h = scroll.data().contentRect().h }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
 
-    }
+    //}
 }
