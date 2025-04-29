@@ -20,7 +20,7 @@ pub fn init(file: [:0]const u8) !PdfImage {
     };
     errdefer c.fz_drop_context(ctx);
     state.ctx = ctx;
-
+    
     c.fz_register_document_handlers(ctx);
     c.fz_set_error_callback(ctx, null, null);
     c.fz_set_warning_callback(ctx, null, null);
@@ -39,7 +39,7 @@ pub fn init(file: [:0]const u8) !PdfImage {
 
         
     const page = c.fz_load_page(ctx, doc, state.page_number);
-
+    
     const scale: f32 = 1.0;
     const ctm = c.fz_scale(scale, scale);
 
@@ -48,7 +48,8 @@ pub fn init(file: [:0]const u8) !PdfImage {
     const data = c.fz_pixmap_samples(ctx, pix);
     const width = c.fz_pixmap_width(ctx, pix);
     const height = c.fz_pixmap_height(ctx, pix);
-
+    //c.fz_drop_pixmap(ctx, pix);
+    //c.fz_drop_page(ctx,page);
     std.debug.print("Width: {d}\n", .{width});
     std.debug.print("Height: {d}\n", .{height});
 
@@ -61,12 +62,49 @@ pub fn init(file: [:0]const u8) !PdfImage {
             const page2 = c.fz_load_page(ctx, doc, 1);
             const pix2 = c.fz_new_pixmap_from_page(ctx,page2,ctm,c.fz_device_rgb(ctx),1);
             const data2 = c.fz_pixmap_samples(ctx, pix2);
+            //c.fz_drop_page(ctx,page2);
+            //c.fz_drop_pixmap(ctx,pix2);
+            
             state.loaded_texture2 = dvui.textureCreate(data2, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
         }
+       
         if(i == 2){
-            state.loaded_texture3 = dvui.textureCreate(data, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            const page3 = c.fz_load_page(ctx, doc, 2);
+            const pix3 = c.fz_new_pixmap_from_page(ctx,page3,ctm,c.fz_device_rgb(ctx),1);
+            const data3 = c.fz_pixmap_samples(ctx, pix3);
+            state.loaded_texture3 = dvui.textureCreate(data3, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
         }
+
+        if(i == 3){
+            const page4 = c.fz_load_page(ctx, doc, 3);
+            const pix4 = c.fz_new_pixmap_from_page(ctx,page4,ctm,c.fz_device_rgb(ctx),1);
+            const data4 = c.fz_pixmap_samples(ctx, pix4);
+            state.loaded_texture4 = dvui.textureCreate(data4, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
         }
+
+
+        if(i == 4){
+            const page5 = c.fz_load_page(ctx, doc, 4);
+            const pix5 = c.fz_new_pixmap_from_page(ctx,page5,ctm,c.fz_device_rgb(ctx),1);
+            const data5 = c.fz_pixmap_samples(ctx, pix5);
+            state.loaded_texture5 = dvui.textureCreate(data5, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
+        }
+
+
+        if(i == 5){
+            const page6 = c.fz_load_page(ctx, doc, 5);
+            const pix6 = c.fz_new_pixmap_from_page(ctx,page6,ctm,c.fz_device_rgb(ctx),1);
+            const data6 = c.fz_pixmap_samples(ctx, pix6);
+            state.loaded_texture6 = dvui.textureCreate(data6, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
+        }
+
+
+
+    }
     
     return PdfImage{
         .data = data,

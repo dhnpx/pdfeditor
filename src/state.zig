@@ -16,7 +16,7 @@ pub var g_win: ?Window = null;
 pub var doc: ?*c.fz_document = null;
 pub var ctx: ?*c.fz_context = null;
 
-pub var current_page_number: u16 = 0;
+pub var current_page_number: u16 = 1;
 
 pub var loaded_texture: ?dvui.Texture = null;
 pub var height: u32 = 0;

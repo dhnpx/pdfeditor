@@ -91,20 +91,74 @@ pub fn gui_frame() !void {
         try dvui.renderTexture(tex, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})){
             std.debug.print("Before\n", .{});
-            if(state.current_page_number > 0){
+            if(state.current_page_number > 1){
                 state.current_page_number = state.current_page_number - 1;
                 std.debug.print("Page Number: {d} \n", .{state.current_page_number});
+
+                if( state.current_page_number == 1){
+                    state.loaded_texture = state.loaded_texture1;
+                }
+
+                if( state.current_page_number == 2){
+                    state.loaded_texture = state.loaded_texture2;
+                }
+
+
+                if( state.current_page_number == 3){
+                    state.loaded_texture = state.loaded_texture3;
+                }
+
+
+                if( state.current_page_number == 4){
+                    state.loaded_texture = state.loaded_texture4;
+                }
+
+
+                if( state.current_page_number == 5){
+                    state.loaded_texture = state.loaded_texture5;
+                }
+
+
             }
-            state.loaded_texture = state.loaded_texture1; 
+            //state.loaded_texture = state.loaded_texture1; 
 
         }
         if (try dvui.button(@src(),"Next",.{}, .{})){
             std.debug.print("Next\n", .{});
-            state.current_page_number = state.current_page_number + 1;
-            if( state.current_page_number < state.max_page) {
+                       if( state.current_page_number < state.max_page) {
+                state.current_page_number = state.current_page_number + 1;
+
                 std.debug.print("Page Number: {d} \n", .{state.current_page_number});
+                
+
+                if( state.current_page_number == 1){
+                    state.loaded_texture = state.loaded_texture1;
+                }
+
+                if( state.current_page_number == 2){
+                    state.loaded_texture = state.loaded_texture2;
+                }
+
+
+                if( state.current_page_number == 3){
+                    state.loaded_texture = state.loaded_texture3;
+                }
+
+
+                if( state.current_page_number == 4){
+                    state.loaded_texture = state.loaded_texture4;
+                }
+
+
+                if( state.current_page_number == 5){
+                    state.loaded_texture = state.loaded_texture5;
+                }
+
+
+
+
             }
-            state.loaded_texture = state.loaded_texture2;
+            //state.loaded_texture = state.loaded_texture2;
         }
 
 
