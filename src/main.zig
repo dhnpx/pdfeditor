@@ -38,21 +38,6 @@ pub fn main() !void {
     });
 
 
-    //testing scroll stuff
-    //const sa_opts = dvui.ScrollAreaWidget.InitOpts{
-    //    .scroll_info    = null,
-    //   .vertical       = null,                 // let DVUI pick auto/given
-    //    .horizontal     = null,
-    //    .vertical_bar   = .show,                // always show vertical bar
-    //    .horizontal_bar = .show,                // always show horizontal bar
-    //    .focus_id       = null,
-    //    .lock_visible   = false,
-    //};
-    //var sa = try dvui.ScrollAreaWidget.init(@src(), sa_opts, .{ .expand = .both });
-    //defer sa.deinit();
-    //try sa.install();
-
-
     
 
     
@@ -75,18 +60,6 @@ pub fn main() !void {
         const quit = try backend.addAllEvents(&win);
         if (quit) break :main_loop;
         
-
-        // Start a scrollable area that fills the window
-//        var scroll = try dvui.scrollArea(@src(), .{}, .{ .expand = .both });   // scrollArea widget :contentReference[oaicite:15]{index=15}
-//        defer scroll.deinit();
-
-        // Push some content—DVUI will handle clipping & offset
-//        for (0..50) |i| {
-            //try dvui.label(@src(), "Item {d}", .{i});                           // label inside scroll :contentReference[oaicite:16]{index=16}
-  //      }
-
-
-
         // if dvui widgets might not cover the whole window, then need to clear
         // the previous frame's render
         _ = Backend.c.SDL_SetRenderDrawColor(backend.renderer, 0, 0, 0, 255);
