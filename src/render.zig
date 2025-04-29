@@ -6,6 +6,7 @@ const c = @cImport(@cInclude("mupdf/fitz.h"));
 const Backend = dvui.backend;
 //just test bud
 const std = @import("std");
+const ArrayList = std.ArrayList;
 
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
@@ -56,23 +57,25 @@ pub fn gui_frame() !void {
     if (state.file != null) {
         std.debug.print("File name: {s}", .{state.file.?});
         const viewport = scroll.data().contentRect();
-        const image = try pdf.init(state.file.?, viewport);
-        state.height = @as(f32, @floatFromInt(image.height));
-        state.width = @as(f32, @floatFromInt(image.width));
-        state.loaded_texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.nearest);
+        const images = try pdf.init(state.file.?, viewport);
+        for (0..images.len) |i| {
+            state.height = @as(f32, @floatFromInt(images.height[i]));
+            state.width = @as(f32, @floatFromInt(images.width[i]));
+            state.loaded_texture = dvui.textureCreate(images.data[i], @intCast(images.width[i]), @intCast(images.height[i]), enums.TextureInterpolation.nearest);
+            const drawRect = dvui.RectScale{ .r = .{
+                .x = scroll.data().contentRect().x,
+                .y = scroll.data().contentRect().y,
+                .w = scroll.data().contentRect().w,
+                .h = state.height,
+            }, .s = 1 };
+            try dvui.renderTexture(state.loaded_texture, drawRect, .{ .debug = true });
+        }
     }
 
     // render texture maybe
-    if (state.loaded_texture) |tex| {
-        std.debug.print("Ok now so like ok dude\n", .{});
-        //const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
-        //const display_height: f32 = @round(@as(f32, @floatFromInt(tex.height)) * scale);
-        const drawRect = dvui.RectScale{ .r = .{
-            .x = scroll.data().contentRect().x,
-            .y = scroll.data().contentRect().y,
-            .w = scroll.data().contentRect().w,
-            .h = state.height,
-        }, .s = 1 };
-        try dvui.renderTexture(tex, drawRect, .{ .debug = true });
-    }
+    // if (state.loaded_texture) |tex| {
+    //     std.debug.print("Ok now so like ok dude\n", .{});
+    //     //const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
+    //     //const display_height: f32 = @round(@as(f32, @floatFromInt(tex.height)) * scale);
+    // }
 }

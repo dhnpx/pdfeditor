@@ -7,12 +7,13 @@ const e = @import("errors.zig");
 const state = @import("state.zig");
 
 pub const PdfImage = struct {
-    data: [*]u8,
-    width: c_int,
-    height: c_int,
+    data: ArrayList([*]u8),
+    width: ArrayList(c_int),
+    height: ArrayList(c_int),
 };
 
 pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
+    var images: PdfImage = PdfImage{};
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -31,47 +32,39 @@ pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
     errdefer c.fz_drop_document(ctx, doc);
     state.doc = doc;
 
-    const page_num: u16 = 0;
-    const page = c.fz_load_page(ctx, doc, page_num);
-
-    var bounds = c.fz_bound_page(ctx, page);
-    const scale = vp.w / bounds.x1;
-    const ctm = c.fz_scale(scale, scale);
-    bounds = c.fz_transform_rect(bounds, ctm);
+    const pages_total: u16 = c.fz_count_pages(ctx, doc);
+    state.pages_total = pages_total;
 
     const colorspace = c.fz_device_rgb(ctx);
 
-    const view_width = @max(1, @min(
-        scale * bounds.x1,
-        vp.w,
-    ));
-    const view_height = @max(1, @min(
-        scale * bounds.y1,
-        vp.h,
-    ));
+    for (0..pages_total) |i| {
+        const page = c.fz_load_page(ctx, doc, i);
+        var bounds = c.fz_bound_page(ctx, page);
+        const scale = vp.w / bounds.x1;
+        const ctm = c.fz_scale(scale, scale);
+        bounds = c.fz_transform_rect(bounds, ctm);
+        const view_width = @max(1, @min(
+            scale * bounds.x1,
+            vp.w,
+        ));
+        const view_height = @max(1, @min(
+            scale * bounds.y1,
+            vp.h,
+        ));
+        const bbox = c.fz_make_irect(
+            0,
+            0,
+            @intFromFloat(view_width),
+            @intFromFloat(view_height),
+        );
+        const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
+        defer c.fz_drop_pixmap(ctx, pix);
+        images.data.append(c.fz_pixmap_samples(ctx, pix));
+        images.width.append(c.fz_pixamp_width(ctx, pix));
+        images.height.append(c.fz_pixmap_height(ctx, pix));
+    }
 
-    const bbox = c.fz_make_irect(
-        0,
-        0,
-        @intFromFloat(view_width),
-        @intFromFloat(view_height),
-    );
-
-    const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
-    defer c.fz_drop_pixmap(ctx, pix);
-
-    const data = c.fz_pixmap_samples(ctx, pix);
-    const width = c.fz_pixmap_width(ctx, pix);
-    const height = c.fz_pixmap_height(ctx, pix);
-
-    std.debug.print("Width: {d}\n", .{width});
-    std.debug.print("Height: {d}\n", .{height});
-
-    return PdfImage{
-        .data = data,
-        .width = width,
-        .height = height,
-    };
+    return images;
 }
 
 pub fn save(ctx: *c.fz_context, doc: *c.fz_document, path: [:0]const u8) !void {
