@@ -1,6 +1,7 @@
 const std = @import("std");
 const dvui = @import("dvui");
 const c = @cImport(@cInclude("mupdf/fitz.h"));
+const pdf = @import("pdf.zig");
 
 const Backend = dvui.backend;
 const Window = dvui.Window;
@@ -22,6 +23,7 @@ pub var ctx: ?*c.fz_context = null;
 pub var pages_total: ?u16 = null;
 
 pub var file: ?[:0]const u8 = null;
-pub var loaded_texture: ?dvui.Texture = null;
-pub var height: f32 = 0;
-pub var width: f32 = 0;
+
+pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
+pub var images: PdfImages = PdfImages{};
+pub var page_current: u16 = 0;

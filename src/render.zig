@@ -30,6 +30,8 @@ pub fn gui_frame() !void {
 
                 if (file != null) {
                     state.file = try std.mem.Allocator.dupeZ(gpa, u8, file.?);
+                    state.images.len = 0;
+                    _ = try pdf.init(state.file.?);
                 }
                 m.close();
             }
@@ -54,28 +56,28 @@ pub fn gui_frame() !void {
     var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
     defer scroll.deinit();
 
-    if (state.file != null) {
+    if (state.images.len != 0) {
         std.debug.print("File name: {s}", .{state.file.?});
-        const viewport = scroll.data().contentRect();
-        const images = try pdf.init(state.file.?, viewport);
-        for (0..images.len) |i| {
-            state.height = @as(f32, @floatFromInt(images.height[i]));
-            state.width = @as(f32, @floatFromInt(images.width[i]));
-            state.loaded_texture = dvui.textureCreate(images.data[i], @intCast(images.width[i]), @intCast(images.height[i]), enums.TextureInterpolation.nearest);
-            const drawRect = dvui.RectScale{ .r = .{
-                .x = scroll.data().contentRect().x,
-                .y = scroll.data().contentRect().y,
-                .w = scroll.data().contentRect().w,
-                .h = state.height,
-            }, .s = 1 };
-            try dvui.renderTexture(state.loaded_texture, drawRect, .{ .debug = true });
+        var hbox = try dvui.box(@src(), .horizontal, .{});
+        defer hbox.deinit();
+        const image = state.images.get(state.page_current);
+        const texture = dvui.textureCreate(image.data, @as(u32, @intCast(image.width)), @as(u32, @intCast(image.height)), enums.TextureInterpolation.linear);
+        const drawRect = dvui.RectScale{ .r = .{
+            .x = scroll.data().contentRect().x,
+            .y = scroll.data().contentRect().y,
+            .w = @floatFromInt(state.images.items(.width)[state.page_current]),
+            .h = @floatFromInt(state.images.items(.width)[state.page_current]),
+        }, .s = 1 };
+        try dvui.renderTexture(texture, drawRect, .{ .debug = true });
+        if (try dvui.button(@src(), "Previous", .{}, .{})) {
+            if (state.page_current != 0) {
+                state.page_current -= 1;
+            }
+        }
+        if (try dvui.button(@src(), "Next", .{}, .{})) {
+            if (state.page_current != state.images.len - 1) {
+                state.page_current += 1;
+            }
         }
     }
-
-    // render texture maybe
-    // if (state.loaded_texture) |tex| {
-    //     std.debug.print("Ok now so like ok dude\n", .{});
-    //     //const scale: f32 = scroll.data().contentRect().w / @as(f32, @floatFromInt(tex.width));
-    //     //const display_height: f32 = @round(@as(f32, @floatFromInt(tex.height)) * scale);
-    // }
 }

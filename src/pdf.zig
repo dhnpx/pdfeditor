@@ -15,11 +15,7 @@ pub const PdfImage = struct {
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
 
-const PdfImages = std.MultiArrayList(PdfImage);
-pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
-    var images = PdfImages{};
-    defer images.deinit(gpa);
-
+pub fn init(file: [:0]const u8) !void {
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -45,31 +41,36 @@ pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
 
     for (0..pages_total) |i| {
         const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
-        var bounds = c.fz_bound_page(ctx, page);
-        const scale = vp.w / bounds.x1;
-        const ctm = c.fz_scale(scale, scale);
-        bounds = c.fz_transform_rect(bounds, ctm);
-        const view_width = @max(1, @min(
-            scale * bounds.x1,
-            vp.w,
-        ));
-        const view_height = @max(1, @min(
-            scale * bounds.y1,
-            vp.h,
-        ));
-        const bbox = c.fz_make_irect(
-            0,
-            0,
-            @intFromFloat(view_width),
-            @intFromFloat(view_height),
-        );
-        const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
+        // var bounds = c.fz_bound_page(ctx, page);
+        // const scale = vp.w / bounds.x1;
+        // const ctm = c.fz_scale(scale, scale);
+        // bounds = c.fz_transform_rect(bounds, ctm);
+        // const view_width = @max(1, @min(
+        //     scale * bounds.x1,
+        //     vp.w,
+        // ));
+        // const view_height = @max(1, @min(
+        //     scale * bounds.y1,
+        //     vp.h,
+        // ));
+        // const bbox = c.fz_make_irect(
+        //     0,
+        //     0,
+        //     @intFromFloat(view_width),
+        //     @intFromFloat(view_height),
+        // );
+        //const pix = c.fz_new_pixmap_with_bbox(ctx, colorspace, bbox, null, 1);
+
+        const ctm = c.fz_scale(1, 1);
+        const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, colorspace, 1);
         defer c.fz_drop_pixmap(ctx, pix);
-        images.data.append(c.fz_pixmap_samples(ctx, pix));
-        images.width.append(c.fz_pixamp_width(ctx, pix));
-        images.height.append(c.fz_pixmap_height(ctx, pix));
+
+        try state.images.append(gpa, .{
+            .data = c.fz_pixmap_samples(ctx, pix),
+            .width = c.fz_pixmap_width(ctx, pix),
+            .height = c.fz_pixmap_height(ctx, pix),
+        });
     }
-    return images;
 }
 
 pub fn save(ctx: *c.fz_context, doc: *c.fz_document, path: [:0]const u8) !void {
