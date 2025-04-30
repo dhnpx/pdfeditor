@@ -9,8 +9,9 @@ const Window = dvui.Window;
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
 
+pub const Mode = enum { pdf, images };
+
 pub const vsync = true;
-pub const show_demo = true;
 pub var scale_val: f32 = 1.0;
 
 pub var show_dialog_outside_frame: bool = false;
@@ -21,11 +22,14 @@ pub var g_win: ?Window = null;
 pub var doc: ?*c.fz_document = null;
 pub var ctx: ?*c.fz_context = null;
 pub var pages_total: u16 = 0;
-
-pub var file: ?[:0]const u8 = null;
-
-
-pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
-pub var images: PdfImages = PdfImages{};
 pub var page_current: u16 = 0;
 
+pub var files = std.ArrayList([:0]const u8).init(gpa);
+
+pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
+pub var textures: PdfImages = PdfImages{};
+
+pub const NonPdfImages = std.MultiArrayList(pdf.NonPdfImage);
+pub var images: NonPdfImages = NonPdfImages{};
+
+pub var mode: Mode = undefined;

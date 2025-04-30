@@ -13,10 +13,17 @@ pub const PdfImage = struct {
     height: c_int,
 };
 
+pub const NonPdfImage = struct {
+    doc: *c.fz_document,
+    data: dvui.Texture,
+    width: c_int,
+    height: c_int,
+};
+
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
 
-pub fn init(file: [:0]const u8) !void {
+pub fn initSingle(file: [:0]const u8) !void {
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -34,9 +41,6 @@ pub fn init(file: [:0]const u8) !void {
     };
     errdefer c.fz_drop_document(ctx, doc);
     state.doc = doc;
-    const total_page: u16 = @intCast(c.fz_count_pages(ctx, doc));
-    //const page_num: u16 = 0;
-    state.max_page = total_page;
 
     const pages_total: u16 = @as(u16, @intCast(c.fz_count_pages(ctx, doc)));
     state.pages_total = pages_total;
@@ -52,7 +56,40 @@ pub fn init(file: [:0]const u8) !void {
 
         const width = c.fz_pixmap_width(ctx, pix);
         const height = c.fz_pixmap_height(ctx, pix);
+        try state.textures.append(gpa, .{
+            .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
+            .width = width,
+            .height = height,
+        });
+    }
+}
+
+pub fn initMultiple(files: ArrayList([:0]const u8)) !void {
+    const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
+        std.debug.print("Failed to create mupdf context\n", .{});
+        return e.DocumentError.FailedToCreateContext;
+    };
+    errdefer c.fz_drop_context(ctx);
+    state.ctx = ctx;
+    c.fz_register_document_handlers(ctx);
+    c.fz_set_error_callback(ctx, null, null);
+    c.fz_set_warning_callback(ctx, null, null);
+
+    for (0..files.items.len) |i| {
+        const doc = c.fz_open_document(ctx, files.items[i].ptr) orelse {
+            std.debug.print("Failed to open document: {s}\n", .{c.fz_caught_message(ctx)});
+            return e.DocumentError.FailedToOpenDocument;
+        };
+        errdefer c.fz_drop_document(ctx, doc);
+        const colorspace = c.fz_device_rgb(ctx);
+        const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
+        const ctm = c.fz_scale(1, 1);
+        const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, colorspace, 1);
+
+        const width = c.fz_pixmap_width(ctx, pix);
+        const height = c.fz_pixmap_height(ctx, pix);
         try state.images.append(gpa, .{
+            .doc = doc,
             .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
             .width = width,
             .height = height,
