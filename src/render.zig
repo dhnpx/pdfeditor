@@ -11,16 +11,14 @@ const ArrayList = std.ArrayList;
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
 
-
 // // both dvui and SDL drawing
 pub fn gui_frame() !void {
     //const backend = state.g_backend orelse return;
     {
-        
-        var m = try dvui.menu(@src(),  .horizontal, .{ .background = true, .expand = .horizontal });
+        var m = try dvui.menu(@src(), .horizontal, .{ .background = true, .expand = .horizontal });
         defer m.deinit();
 
-        if (try dvui.menuItemLabel(@src(), "File", .{ .submenu = true }, .{  .expand = .none })) |r| {
+        if (try dvui.menuItemLabel(@src(), "File", .{ .submenu = true }, .{ .expand = .none })) |r| {
             var fw = try dvui.floatingMenu(@src(), r, .{});
             defer fw.deinit();
             if (try dvui.menuItemLabel(@src(), "Open", .{}, .{}) != null) {
@@ -29,12 +27,10 @@ pub fn gui_frame() !void {
 
                 const file = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
 
-
                 if (file != null) {
                     state.file = try std.mem.Allocator.dupeZ(gpa, u8, file.?);
                     state.images.len = 0;
                     _ = try pdf.init(state.file.?);
-
                 }
                 m.close();
             }
@@ -56,29 +52,29 @@ pub fn gui_frame() !void {
         }
     }
 
-    //var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
-    //var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
-    var scroll = try dvui.scrollArea(@src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000), .w = @floatFromInt(100000) } },);
+    var scroll = try dvui.scrollArea(@src(), .{}, .{ .expand = .both });
     defer scroll.deinit();
+
     if (state.images.len != 0) {
         std.debug.print("File name: {s}\n", .{state.file.?});
         const image = state.images.get(state.page_current);
         std.debug.print("image: {}\n", .{image});
-        const drawRect = dvui.RectScale{ .r = .{
-            //.x = 50,
-            //.y = 100,
+        const drawRect = dvui.RectScale{
+            .r = .{
+                //.x = 50,
+                //.y = 100,
 
+                .x = scroll.data().contentRect().x,
 
-            .x = scroll.data().contentRect().x,
-
-
-            .y = scroll.data().contentRect().y,
-            .w = @floatFromInt(image.width),
-            .h = @floatFromInt(image.height),
-        }, .s = 1 };
+                .y = scroll.data().contentRect().y,
+                .w = @floatFromInt(image.width),
+                .h = @floatFromInt(image.height),
+            },
+            .s = 1,
+        };
         var hbox = try dvui.box(@src(), .horizontal, .{});
         defer hbox.deinit();
- 
+
         try dvui.renderTexture(image.data, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})) {
             std.debug.print("Prev button\n", .{});
@@ -93,5 +89,4 @@ pub fn gui_frame() !void {
             }
         }
     }
-
 }

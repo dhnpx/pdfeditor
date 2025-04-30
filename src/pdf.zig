@@ -5,10 +5,7 @@ const ArrayList = std.ArrayList;
 const c = @cImport(@cInclude("mupdf/fitz.h"));
 const e = @import("errors.zig");
 const state = @import("state.zig");
-const dvui = @import("dvui");
 const enums = dvui.enums;
-
-
 
 pub const PdfImage = struct {
     data: dvui.Texture,
@@ -26,7 +23,7 @@ pub fn init(file: [:0]const u8) !void {
     };
     errdefer c.fz_drop_context(ctx);
     state.ctx = ctx;
-    
+
     c.fz_register_document_handlers(ctx);
     c.fz_set_error_callback(ctx, null, null);
     c.fz_set_warning_callback(ctx, null, null);
@@ -37,13 +34,12 @@ pub fn init(file: [:0]const u8) !void {
     };
     errdefer c.fz_drop_document(ctx, doc);
     state.doc = doc;
-    const total_page: u16 = @intCast(c.fz_count_pages(ctx,doc));
+    const total_page: u16 = @intCast(c.fz_count_pages(ctx, doc));
     //const page_num: u16 = 0;
     state.max_page = total_page;
 
     const pages_total: u16 = @as(u16, @intCast(c.fz_count_pages(ctx, doc)));
     state.pages_total = pages_total;
-
 
     const colorspace = c.fz_device_rgb(ctx);
 
@@ -62,7 +58,6 @@ pub fn init(file: [:0]const u8) !void {
             .height = height,
         });
     }
-
 }
 
 pub fn save(ctx: *c.fz_context, doc: *c.fz_document, path: [:0]const u8) !void {
