@@ -27,7 +27,7 @@ pub var page_current: u16 = 0;
 pub var files = std.ArrayList([:0]const u8).init(gpa);
 
 pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
-pub var textures: PdfImages = PdfImages{};
+pub var pdfs: PdfImages = PdfImages{};
 
 pub const NonPdfImages = std.MultiArrayList(pdf.NonPdfImage);
 pub var images: NonPdfImages = NonPdfImages{};
@@ -40,6 +40,6 @@ pub fn clearState() void {
     pages_total = 0;
     page_current = 0;
     files.clearRetainingCapacity();
-    textures.clearRetainingCapacity();
+    pdfs.clearRetainingCapacity();
     images.clearRetainingCapacity();
 }

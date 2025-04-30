@@ -56,7 +56,7 @@ pub fn initSingle(file: [:0]const u8) !void {
 
         const width = c.fz_pixmap_width(ctx, pix);
         const height = c.fz_pixmap_height(ctx, pix);
-        try state.textures.append(gpa, .{
+        try state.pdfs.append(gpa, .{
             .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
             .width = width,
             .height = height,
@@ -121,4 +121,11 @@ pub fn saveImages(ctx: *c.fz_context, images: std.MultiArrayList(NonPdfImage), p
         c.fz_write_document(ctx, writer_pdf, images.get(i).doc);
     }
     c.fz_close_document_writer(ctx, writer_pdf);
+
+    state.doc = null;
+    state.ctx = null;
+    state.pages_total = 0;
+    state.files.clearRetainingCapacity();
+    state.pdfs.clearRetainingCapacity();
+    state.images.clearRetainingCapacity();
 }

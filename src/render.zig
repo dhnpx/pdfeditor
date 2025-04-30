@@ -58,6 +58,8 @@ pub fn gui_frame() !void {
                     }
                     if (state.mode == .images) {
                         try pdf.saveImages(state.ctx.?, state.images, val);
+                        state.mode = state.Mode.pdf;
+                        try pdf.initSingle(val);
                     }
                 }
                 m.close();
@@ -77,9 +79,9 @@ pub fn gui_frame() !void {
     defer scroll.deinit();
 
     if (state.mode == .pdf) {
-        if (state.textures.len != 0) {
-            std.debug.print("File name: {s}\n", .{state.files.items[0]});
-            const texture = state.textures.get(state.page_current);
+        if (state.pdfs.len != 0) {
+            //std.debug.print("File name: {s}\n", .{state.files.items[0]});
+            const texture = state.pdfs.get(state.page_current);
             std.debug.print("image: {}\n", .{texture});
             const drawRect = dvui.RectScale{
                 .r = .{
@@ -106,13 +108,18 @@ pub fn gui_frame() !void {
                     state.page_current += 1;
                 }
             }
+            if (try dvui.button(@src(), "Rotate", .{}, .{})) {
+                if (state.mode != .pdf) {
+                    try dvui.dialog(@src(), .{ .modal = false, .title = "Warning", .ok_label = "Ok", .message = "Please save first" });
+                }
+            }
         }
     }
     if (state.mode == .images) {
         if (state.images.len != 0) {
-            std.debug.print("File name: {s}\n", .{state.files.items[state.page_current]});
+            //std.debug.print("File name: {s}\n", .{state.files.items[state.page_current]});
             const image = state.images.get(state.page_current);
-            std.debug.print("image: {}\n", .{image});
+            _ = std.debug.print("image: {}\n", .{image});
             const drawRect = dvui.RectScale{
                 .r = .{
                     .x = scroll.data().contentRect().x,
@@ -133,9 +140,14 @@ pub fn gui_frame() !void {
                 }
             }
             if (try dvui.button(@src(), "Next", .{}, .{})) {
-                std.debug.print("Next button\n", .{});
+                _ = std.debug.print("Next button\n", .{});
                 if (state.page_current < state.pages_total - 1) {
                     state.page_current += 1;
+                }
+            }
+            if (try dvui.button(@src(), "Rotate", .{}, .{})) {
+                if (state.mode != .pdf) {
+                    try dvui.dialog(@src(), .{ .modal = false, .title = "Warning", .ok_label = "Ok", .message = "Please save first" });
                 }
             }
         }
