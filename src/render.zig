@@ -57,25 +57,29 @@ pub fn gui_frame() !void {
     defer scroll.deinit();
 
     if (state.images.len != 0) {
-        std.debug.print("File name: {s}", .{state.file.?});
-        var hbox = try dvui.box(@src(), .horizontal, .{});
+        std.debug.print("File name: {s}\n", .{state.file.?});
+        var hbox = try dvui.box(@src(), .horizontal, .{ .background = true });
         defer hbox.deinit();
         const image = state.images.get(state.page_current);
+        std.debug.print("image: {}\n", .{image});
         const texture = dvui.textureCreate(image.data, @as(u32, @intCast(image.width)), @as(u32, @intCast(image.height)), enums.TextureInterpolation.linear);
+        std.debug.print("after create texture\n", .{});
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
-            .w = @floatFromInt(state.images.items(.width)[state.page_current]),
-            .h = @floatFromInt(state.images.items(.width)[state.page_current]),
+            .w = @floatFromInt(image.width),
+            .h = @floatFromInt(image.height),
         }, .s = 1 };
-        try dvui.renderTexture(texture, drawRect, .{ .debug = true });
+        try dvui.renderTexture(texture, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})) {
+            std.debug.print("Prev button\n", .{});
             if (state.page_current != 0) {
                 state.page_current -= 1;
             }
         }
         if (try dvui.button(@src(), "Next", .{}, .{})) {
-            if (state.page_current != state.images.len - 1) {
+            std.debug.print("Next button\n", .{});
+            if (state.page_current < state.pages_total) {
                 state.page_current += 1;
             }
         }

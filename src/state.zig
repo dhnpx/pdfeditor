@@ -20,7 +20,7 @@ pub var g_win: ?Window = null;
 // pdf
 pub var doc: ?*c.fz_document = null;
 pub var ctx: ?*c.fz_context = null;
-pub var pages_total: ?u16 = null;
+pub var pages_total: u16 = 0;
 
 pub var file: ?[:0]const u8 = null;
 
