@@ -58,19 +58,17 @@ pub fn gui_frame() !void {
 
     if (state.images.len != 0) {
         std.debug.print("File name: {s}\n", .{state.file.?});
-        var hbox = try dvui.box(@src(), .horizontal, .{ .background = true });
+        var hbox = try dvui.box(@src(), .horizontal, .{});
         defer hbox.deinit();
         const image = state.images.get(state.page_current);
         std.debug.print("image: {}\n", .{image});
-        const texture = dvui.textureCreate(image.data, @as(u32, @intCast(image.width)), @as(u32, @intCast(image.height)), enums.TextureInterpolation.linear);
-        std.debug.print("after create texture\n", .{});
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
             .w = @floatFromInt(image.width),
             .h = @floatFromInt(image.height),
         }, .s = 1 };
-        try dvui.renderTexture(texture, drawRect, .{ .debug = false });
+        try dvui.renderTexture(image.data, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})) {
             std.debug.print("Prev button\n", .{});
             if (state.page_current != 0) {
