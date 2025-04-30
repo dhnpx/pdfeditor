@@ -67,14 +67,16 @@ pub fn gui_frame() !void {
     //try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
     //t12.deinit();
     //var t12 = try dvui.texture
-    var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
+  //  var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
     
     //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
-    defer pageBox.deinit();
+//    defer pageBox.deinit();
     
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
+            //.x = 0,
+            //.y = 0,
             .w = @floatFromInt(state.width),
             //.w = scroll.data().contentRect().w,
             .h = @floatFromInt(state.height),
