@@ -39,8 +39,6 @@ pub fn main() !void {
 
 
     
-
-    
     state.g_backend = backend;
     defer backend.deinit();
 
