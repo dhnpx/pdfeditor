@@ -7,13 +7,19 @@ const e = @import("errors.zig");
 const state = @import("state.zig");
 
 pub const PdfImage = struct {
-    data: ArrayList([*]u8),
-    width: ArrayList(c_int),
-    height: ArrayList(c_int),
+    data: [*]u8,
+    width: c_int,
+    height: c_int,
 };
 
+var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
+const gpa = gpa_instance.allocator();
+
+const PdfImages = std.MultiArrayList(PdfImage);
 pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
-    var images: PdfImage = PdfImage{};
+    var images = PdfImages{};
+    defer images.deinit(gpa);
+
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -32,13 +38,13 @@ pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
     errdefer c.fz_drop_document(ctx, doc);
     state.doc = doc;
 
-    const pages_total: u16 = c.fz_count_pages(ctx, doc);
+    const pages_total: u16 = @as(u16, @intCast(c.fz_count_pages(ctx, doc)));
     state.pages_total = pages_total;
 
     const colorspace = c.fz_device_rgb(ctx);
 
     for (0..pages_total) |i| {
-        const page = c.fz_load_page(ctx, doc, i);
+        const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
         var bounds = c.fz_bound_page(ctx, page);
         const scale = vp.w / bounds.x1;
         const ctm = c.fz_scale(scale, scale);
@@ -63,7 +69,6 @@ pub fn init(file: [:0]const u8, vp: dvui.Rect) !PdfImage {
         images.width.append(c.fz_pixamp_width(ctx, pix));
         images.height.append(c.fz_pixmap_height(ctx, pix));
     }
-
     return images;
 }
 
