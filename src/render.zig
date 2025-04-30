@@ -52,22 +52,29 @@ pub fn gui_frame() !void {
             _ = try dvui.menuItemLabel(@src(), "Dummy Super Long", .{}, .{ .expand = .horizontal });
         }
     }
-    var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
-    var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
+    //var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
+    //var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
+    var scroll = try dvui.scrollArea(@src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000), .w = @floatFromInt(100000) } },);
     defer scroll.deinit();
-
     if (state.images.len != 0) {
         std.debug.print("File name: {s}\n", .{state.file.?});
-        var hbox = try dvui.box(@src(), .horizontal, .{});
-        defer hbox.deinit();
         const image = state.images.get(state.page_current);
         std.debug.print("image: {}\n", .{image});
         const drawRect = dvui.RectScale{ .r = .{
+            //.x = 50,
+            //.y = 100,
+
+
             .x = scroll.data().contentRect().x,
+
+
             .y = scroll.data().contentRect().y,
             .w = @floatFromInt(image.width),
             .h = @floatFromInt(image.height),
         }, .s = 1 };
+        var hbox = try dvui.box(@src(), .horizontal, .{});
+        defer hbox.deinit();
+ 
         try dvui.renderTexture(image.data, drawRect, .{ .debug = false });
         if (try dvui.button(@src(), "Previous", .{}, .{})) {
             std.debug.print("Prev button\n", .{});
@@ -77,7 +84,7 @@ pub fn gui_frame() !void {
         }
         if (try dvui.button(@src(), "Next", .{}, .{})) {
             std.debug.print("Next button\n", .{});
-            if (state.page_current < state.pages_total) {
+            if (state.page_current < state.pages_total - 1) {
                 state.page_current += 1;
             }
         }
