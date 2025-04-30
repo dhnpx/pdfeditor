@@ -77,25 +77,27 @@ pub fn initMultiple(files: ArrayList([:0]const u8)) !void {
 
     state.pages_total = @as(u16, @intCast(files.items.len));
     for (0..files.items.len) |i| {
-        const doc = c.fz_open_document(ctx, files.items[i].ptr) orelse {
+        const doc = c.fz_open_document(ctx, files.items[i]) orelse {
             std.debug.print("Failed to open document: {s}\n", .{c.fz_caught_message(ctx)});
             return e.DocumentError.FailedToOpenDocument;
         };
         const keep = c.fz_keep_document(ctx, doc);
         errdefer c.fz_drop_document(ctx, doc);
         const colorspace = c.fz_device_rgb(ctx);
-        const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
+        const page = c.fz_load_page(ctx, doc, 0);
         const ctm = c.fz_scale(1, 1);
         const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, colorspace, 1);
 
         const width = c.fz_pixmap_width(ctx, pix);
         const height = c.fz_pixmap_height(ctx, pix);
+        std.debug.print("before append", .{});
         try state.images.append(gpa, .{
             .doc = keep,
             .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
             .width = width,
             .height = height,
         });
+        std.debug.print("loop iter: {d}\n", .{i});
     }
 }
 
@@ -106,5 +108,17 @@ pub fn save(ctx: *c.fz_context, doc: *c.fz_document, path: [:0]const u8) !void {
     };
     defer c.fz_drop_document_writer(ctx, writer_pdf);
     c.fz_write_document(ctx, writer_pdf, doc);
+    c.fz_close_document_writer(ctx, writer_pdf);
+}
+
+pub fn saveImages(ctx: *c.fz_context, images: std.MultiArrayList(NonPdfImage), path: [:0]const u8) !void {
+    const writer_pdf = c.fz_new_pdf_writer(ctx, path, null) orelse {
+        std.debug.print("Failed to create writer", .{});
+        return e.WriterError.FailedToCreateWriter;
+    };
+    defer c.fz_drop_document_writer(ctx, writer_pdf);
+    for (0..images.len) |i| {
+        c.fz_write_document(ctx, writer_pdf, images.get(i).doc);
+    }
     c.fz_close_document_writer(ctx, writer_pdf);
 }

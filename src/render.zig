@@ -37,19 +37,28 @@ pub fn gui_frame() !void {
             }
             if (try dvui.menuItemLabel(@src(), "Open images", .{}, .{}) != null) {
                 const files = try dvui.dialogNativeFileOpenMultiple(dvui.currentWindow().arena(), .{ .title = "Open images" });
+                std.debug.print("files: {s}\n", .{files.?});
                 if (files.?.len != 0) {
                     state.clearState();
                     state.mode = state.Mode.images;
                     for (0..files.?.len) |i| {
                         try state.files.append(files.?[i]);
                     }
+                    std.debug.print("state.files: {s}\n", .{state.files.items});
                     _ = try pdf.initMultiple(state.files);
+                    std.debug.print("after init multiple\n", .{});
                 }
+                m.close();
             }
             if (try dvui.menuItemLabel(@src(), "Save", .{}, .{}) != null) {
                 const path = try dvui.dialogNativeFileSave(dvui.currentWindow().arena(), .{ .title = "Save" });
                 if (path) |val| {
-                    try pdf.save(state.ctx.?, state.doc.?, val);
+                    if (state.mode == .pdf) {
+                        try pdf.save(state.ctx.?, state.doc.?, val);
+                    }
+                    if (state.mode == .images) {
+                        try pdf.saveImages(state.ctx.?, state.images, val);
+                    }
                 }
                 m.close();
             }
