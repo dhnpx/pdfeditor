@@ -1,8 +1,13 @@
+const std = @import("std");
 const dvui = @import("dvui");
 const c = @cImport(@cInclude("mupdf/fitz.h"));
+const pdf = @import("pdf.zig");
 
 const Backend = dvui.backend;
 const Window = dvui.Window;
+
+var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
+const gpa = gpa_instance.allocator();
 
 pub const vsync = true;
 pub const show_demo = true;
@@ -15,24 +20,12 @@ pub var g_win: ?Window = null;
 // pdf
 pub var doc: ?*c.fz_document = null;
 pub var ctx: ?*c.fz_context = null;
+pub var pages_total: u16 = 0;
 
-pub var current_page_number: u16 = 1;
+pub var file: ?[:0]const u8 = null;
 
-pub var loaded_texture: ?dvui.Texture = null;
-pub var height: u32 = 0;
-pub var width: u32 = 0;
-pub var page_number: u16 = 0;
-pub var max_page: u16 = 0;
-pub var loaded_texture1: ?dvui.Texture = null;
-pub var loaded_texture2: ?dvui.Texture = null;
-pub var loaded_texture3: ?dvui.Texture = null;
-pub var loaded_texture4: ?dvui.Texture = null;
-pub var loaded_texture5: ?dvui.Texture = null;
-pub var loaded_texture6: ?dvui.Texture = null;
-pub var loaded_texture7: ?dvui.Texture = null;
-pub var loaded_texture8: ?dvui.Texture = null;
-pub var loaded_texture9: ?dvui.Texture = null;
-pub var loaded_texture10: ?dvui.Texture = null;
-pub var loaded_texture11: ?dvui.Texture = null;
-pub var loaded_texture12: ?dvui.Texture = null;
+
+pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
+pub var images: PdfImages = PdfImages{};
+pub var page_current: u16 = 0;
 

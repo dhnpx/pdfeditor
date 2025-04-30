@@ -1,5 +1,8 @@
-const c = @cImport(@cInclude("mupdf/fitz.h"));
 const std = @import("std");
+const dvui = @import("dvui");
+const ArrayList = std.ArrayList;
+
+const c = @cImport(@cInclude("mupdf/fitz.h"));
 const e = @import("errors.zig");
 const state = @import("state.zig");
 const dvui = @import("dvui");
@@ -8,12 +11,15 @@ const enums = dvui.enums;
 
 
 pub const PdfImage = struct {
-    data: [*]u8,
+    data: dvui.Texture,
     width: c_int,
     height: c_int,
 };
 
-pub fn init(file: [:0]const u8) !PdfImage {
+var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
+const gpa = gpa_instance.allocator();
+
+pub fn init(file: [:0]const u8) !void {
     const ctx = c.fz_new_context(null, null, c.FZ_STORE_UNLIMITED) orelse {
         std.debug.print("Failed to create mupdf context\n", .{});
         return e.DocumentError.FailedToCreateContext;
@@ -35,100 +41,28 @@ pub fn init(file: [:0]const u8) !PdfImage {
     //const page_num: u16 = 0;
     state.max_page = total_page;
 
+    const pages_total: u16 = @as(u16, @intCast(c.fz_count_pages(ctx, doc)));
+    state.pages_total = pages_total;
 
 
-        
-    const page = c.fz_load_page(ctx, doc, state.page_number);
-    const dpi: f32 = 288.0;
-    const scale: f32 = dpi / 72.0;
-    //const scale: f32 = 1.0;
-    const ctm = c.fz_scale(scale, scale);
+    const colorspace = c.fz_device_rgb(ctx);
 
-    const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, c.fz_device_rgb(ctx), 1);
+    for (0..pages_total) |i| {
+        const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
 
-    const data = c.fz_pixmap_samples(ctx, pix);
-    const width = c.fz_pixmap_width(ctx, pix);
-    const height = c.fz_pixmap_height(ctx, pix);
-    //c.fz_drop_pixmap(ctx, pix);
-    //c.fz_drop_page(ctx,page);
-    std.debug.print("Width: {d}\n", .{width});
-    std.debug.print("Height: {d}\n", .{height});
+        const ctm = c.fz_scale(1, 1);
+        const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, colorspace, 1);
+        defer c.fz_drop_pixmap(ctx, pix);
 
-    for(0..total_page) |i|{
-        std.debug.print("page {} of {}\n", .{i+1,total_page});
-        if(i == 0){
-        //state.loaded_texture = dvui.textureCreate(data, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-        }
-        if(i == 1){
-            const page2 = c.fz_load_page(ctx, doc, 1);
-            const pix2 = c.fz_new_pixmap_from_page(ctx,page2,ctm,c.fz_device_rgb(ctx),1);
-            const data2 = c.fz_pixmap_samples(ctx, pix2);
-            //c.fz_drop_page(ctx,page2);
-            //c.fz_drop_pixmap(ctx,pix2);
-            
-            state.loaded_texture2 = dvui.textureCreate(data2, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-        }
-       
-        if(i == 2){
-            const page3 = c.fz_load_page(ctx, doc, 2);
-            const pix3 = c.fz_new_pixmap_from_page(ctx,page3,ctm,c.fz_device_rgb(ctx),1);
-            const data3 = c.fz_pixmap_samples(ctx, pix3);
-            state.loaded_texture3 = dvui.textureCreate(data3, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-        if(i == 3){
-            const page4 = c.fz_load_page(ctx, doc, 3);
-            const pix4 = c.fz_new_pixmap_from_page(ctx,page4,ctm,c.fz_device_rgb(ctx),1);
-            const data4 = c.fz_pixmap_samples(ctx, pix4);
-            state.loaded_texture4 = dvui.textureCreate(data4, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-
-        if(i == 4){
-            const page5 = c.fz_load_page(ctx, doc, 4);
-            const pix5 = c.fz_new_pixmap_from_page(ctx,page5,ctm,c.fz_device_rgb(ctx),1);
-            const data5 = c.fz_pixmap_samples(ctx, pix5);
-            state.loaded_texture5 = dvui.textureCreate(data5, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-
-        if(i == 5){
-            const page6 = c.fz_load_page(ctx, doc, 5);
-            const pix6 = c.fz_new_pixmap_from_page(ctx,page6,ctm,c.fz_device_rgb(ctx),1);
-            const data6 = c.fz_pixmap_samples(ctx, pix6);
-            state.loaded_texture6 = dvui.textureCreate(data6, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-        if(i == 6){
-            const page7 = c.fz_load_page(ctx, doc, 6);
-            const pix7 = c.fz_new_pixmap_from_page(ctx,page7,ctm,c.fz_device_rgb(ctx),1);
-            const data7 = c.fz_pixmap_samples(ctx, pix7);
-            state.loaded_texture7 = dvui.textureCreate(data7, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-
-        if(i == 7){
-            const page7 = c.fz_load_page(ctx, doc, 7);
-            const pix7 = c.fz_new_pixmap_from_page(ctx,page7,ctm,c.fz_device_rgb(ctx),1);
-            const data7 = c.fz_pixmap_samples(ctx, pix7);
-            state.loaded_texture7 = dvui.textureCreate(data7, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
-            
-        }
-
-
-
+        const width = c.fz_pixmap_width(ctx, pix);
+        const height = c.fz_pixmap_height(ctx, pix);
+        try state.images.append(gpa, .{
+            .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
+            .width = width,
+            .height = height,
+        });
     }
-    
-    return PdfImage{
-        .data = data,
-        .width = width,
-        .height = height,
-    };
+
 }
 
 pub fn save(ctx: *c.fz_context, doc: *c.fz_document, path: [:0]const u8) !void {

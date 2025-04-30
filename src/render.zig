@@ -6,6 +6,10 @@ const c = @cImport(@cInclude("mupdf/fitz.h"));
 const Backend = dvui.backend;
 //just test bud
 const std = @import("std");
+const ArrayList = std.ArrayList;
+
+var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
+const gpa = gpa_instance.allocator();
 
 
 // // both dvui and SDL drawing
@@ -25,14 +29,12 @@ pub fn gui_frame() !void {
 
                 const file = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
 
-                if (file) |val| {
-                    const image = try pdf.init(val);
-                    state.height = @intCast(image.height);
-                    state.width = @intCast(image.width);
-                    state.loaded_texture = dvui.textureCreate(image.data, @intCast(image.width), @intCast(image.height), enums.TextureInterpolation.nearest);
-                    state.loaded_texture1 = state.loaded_texture;
-                } else {
-                    std.debug.print("File is null\n", .{});
+
+                if (file != null) {
+                    state.file = try std.mem.Allocator.dupeZ(gpa, u8, file.?);
+                    state.images.len = 0;
+                    _ = try pdf.init(state.file.?);
+
                 }
                 m.close();
             }
@@ -54,154 +56,42 @@ pub fn gui_frame() !void {
         }
     }
 
-//    const width2: u32 = state.width + 10;
-//    const fwidth2: f32 = @floatFromInt(width2);
-//    const height2: u32 = state.height + 10;
-//    const fheight2: f32 = @floatFromInt(height2);
-    var scroll = try dvui.scrollArea( @src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000) , .w = @floatFromInt(100000) } }, );
+    //var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
+    //var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
+    var scroll = try dvui.scrollArea(@src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000), .w = @floatFromInt(100000) } },);
     defer scroll.deinit();
-    //var t12 = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal });
-    //try t12.addText(
-    //\\DVUI
-    //,.{});
-    //try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
-    //t12.deinit();
-    //var t12 = try dvui.texture
-    //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
-    
-    //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
-    //defer pageBox.deinit();
-    
+    if (state.images.len != 0) {
+        std.debug.print("File name: {s}\n", .{state.file.?});
+        const image = state.images.get(state.page_current);
+        std.debug.print("image: {}\n", .{image});
         const drawRect = dvui.RectScale{ .r = .{
-            .x = scroll.data().contentRect().x,
-            .y = scroll.data().contentRect().y,
-            //.w = @floatFromInt(state.height),
-            .w = scroll.data().contentRect().w,
-            //.h = @floatFromInt(state.height),
-            .h = scroll.data().contentRect().h,
-        //}, .s = state.scale_val};
-        }, .s = 4.0};
-    
+            //.x = 50,
+            //.y = 100,
 
-       
-    // render texture maybe
-    if (state.loaded_texture) |tex| {
-    //std.debug.print("Ok now so like ok dude\n", .{});
-    
+
+            .x = scroll.data().contentRect().x,
+
+
+            .y = scroll.data().contentRect().y,
+            .w = @floatFromInt(image.width),
+            .h = @floatFromInt(image.height),
+        }, .s = 1 };
         var hbox = try dvui.box(@src(), .horizontal, .{});
         defer hbox.deinit();
-        try dvui.renderTexture(tex, drawRect, .{ .debug = false });
-        if (try dvui.button(@src(), "Previous", .{}, .{})){
-            std.debug.print("Before\n", .{});
-            if(state.current_page_number > 1){
-                state.current_page_number = state.current_page_number - 1;
-                std.debug.print("Page Number: {d} \n", .{state.current_page_number});
-
-                if( state.current_page_number == 1){
-                    state.loaded_texture = state.loaded_texture1;
-                }
-
-                if( state.current_page_number == 2){
-                    state.loaded_texture = state.loaded_texture2;
-                }
-
-
-                if( state.current_page_number == 3){
-                    state.loaded_texture = state.loaded_texture3;
-                }
-
-
-                if( state.current_page_number == 4){
-                    state.loaded_texture = state.loaded_texture4;
-                }
-
-
-                if( state.current_page_number == 5){
-                    state.loaded_texture = state.loaded_texture5;
-                }
-                if( state.current_page_number == 6){
-                    state.loaded_texture = state.loaded_texture6;
-                }
-
-
-                if( state.current_page_number == 7){
-                    state.loaded_texture = state.loaded_texture7;
-                }
-
-
-                if( state.current_page_number == 8){
-                    state.loaded_texture = state.loaded_texture8;
-                }
-
-
-
-
+ 
+        try dvui.renderTexture(image.data, drawRect, .{ .debug = false });
+        if (try dvui.button(@src(), "Previous", .{}, .{})) {
+            std.debug.print("Prev button\n", .{});
+            if (state.page_current != 0) {
+                state.page_current -= 1;
             }
-            //state.loaded_texture = state.loaded_texture1; 
-
         }
-        if (try dvui.button(@src(),"Next",.{}, .{})){
-            std.debug.print("Next\n", .{});
-                       if( state.current_page_number < state.max_page) {
-                state.current_page_number = state.current_page_number + 1;
-
-                std.debug.print("Page Number: {d} \n", .{state.current_page_number});
-                
-
-                if( state.current_page_number == 1){
-                    state.loaded_texture = state.loaded_texture1;
-                }
-
-                if( state.current_page_number == 2){
-                    state.loaded_texture = state.loaded_texture2;
-                }
-
-
-                if( state.current_page_number == 3){
-                    state.loaded_texture = state.loaded_texture3;
-                }
-
-
-                if( state.current_page_number == 4){
-                    state.loaded_texture = state.loaded_texture4;
-                }
-
-
-                if( state.current_page_number == 5){
-                    state.loaded_texture = state.loaded_texture5;
-                }
-
-                if( state.current_page_number == 6){
-                    state.loaded_texture = state.loaded_texture6;
-                }
-
-
-                if( state.current_page_number == 7){
-                    state.loaded_texture = state.loaded_texture7;
-                }
-
-
-                if( state.current_page_number == 8){
-                    state.loaded_texture = state.loaded_texture8;
-                }
-
-
-
-
-
+        if (try dvui.button(@src(), "Next", .{}, .{})) {
+            std.debug.print("Next button\n", .{});
+            if (state.page_current < state.pages_total - 1) {
+                state.page_current += 1;
             }
-            //state.loaded_texture = state.loaded_texture2;
         }
+    }
 
-
-        //try dvui.renderTexture(tex, .{ .r = .{ .x = 0, .y = 0, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
-    } 
-    //if (state.loaded_texture2) |text| {
-      //  std.debug.print("2nd texture\n", .{});
-        //try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
-
-
-       // try dvui.renderTexture(text, .{ .r = .{ .x = 0, .y = fheight2, .w = scroll.data().contentRect().w, .h = scroll.data().contentRect().h }, .s = state.scale_val }, .{ .rotation = 0, .colormod = .{}, .uv = .{ .x = -1, .y = -1 }, .debug = false });
-
-    //}
 }
