@@ -5,7 +5,7 @@ const dvui = @import("dvui");
 const state = @import("state.zig");
 const render = @import("render.zig");
 const pdf = @import("pdf.zig");
-
+//const BBackend = @import("SDLBackend");
 const Backend = dvui.backend;
 comptime {
     std.debug.assert(@hasDecl(Backend, "SDLBackend"));
@@ -22,7 +22,6 @@ const gpa = gpa_instance.allocator();
 ///
 pub fn main() !void {
     std.log.info("SDL version: {}", .{Backend.getSDLVersion()});
-
     dvui.Examples.show_demo_window = state.show_demo;
 
     defer if (gpa_instance.deinit() != .ok) @panic("Memory leak on exit!");
@@ -36,15 +35,16 @@ pub fn main() !void {
         .title = "DVUI SDL Standalone Example",
         .icon = window_icon_png, // can also call setIconFromFileContent()
     });
+
+
+    
     state.g_backend = backend;
     defer backend.deinit();
 
     _ = Backend.c.SDL_EnableScreenSaver();
-
     // init dvui Window (maps onto a single OS window)
     var win = try dvui.Window.init(@src(), gpa, backend.backend(), .{});
     defer win.deinit();
-
     main_loop: while (true) {
 
         // beginWait coordinates with waitTime below to run frames only when needed
@@ -52,11 +52,11 @@ pub fn main() !void {
 
         // marks the beginning of a frame for dvui, can call dvui functions after this
         try win.begin(nstime);
-
+        
         // send all SDL events to dvui for processing
         const quit = try backend.addAllEvents(&win);
         if (quit) break :main_loop;
-
+        
         // if dvui widgets might not cover the whole window, then need to clear
         // the previous frame's render
         _ = Backend.c.SDL_SetRenderDrawColor(backend.renderer, 0, 0, 0, 255);

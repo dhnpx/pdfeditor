@@ -24,6 +24,8 @@ pub var pages_total: u16 = 0;
 
 pub var file: ?[:0]const u8 = null;
 
+
 pub const PdfImages = std.MultiArrayList(pdf.PdfImage);
 pub var images: PdfImages = PdfImages{};
 pub var page_current: u16 = 0;
+

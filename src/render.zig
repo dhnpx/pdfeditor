@@ -11,15 +11,16 @@ const ArrayList = std.ArrayList;
 var gpa_instance = std.heap.GeneralPurposeAllocator(.{}){};
 const gpa = gpa_instance.allocator();
 
-// // both dvui and SDL drawing
 
+// // both dvui and SDL drawing
 pub fn gui_frame() !void {
     //const backend = state.g_backend orelse return;
     {
-        var m = try dvui.menu(@src(), .horizontal, .{ .background = true, .expand = .horizontal });
+        
+        var m = try dvui.menu(@src(),  .horizontal, .{ .background = true, .expand = .horizontal });
         defer m.deinit();
 
-        if (try dvui.menuItemLabel(@src(), "File", .{ .submenu = true }, .{ .expand = .none })) |r| {
+        if (try dvui.menuItemLabel(@src(), "File", .{ .submenu = true }, .{  .expand = .none })) |r| {
             var fw = try dvui.floatingMenu(@src(), r, .{});
             defer fw.deinit();
             if (try dvui.menuItemLabel(@src(), "Open", .{}, .{}) != null) {
@@ -28,10 +29,12 @@ pub fn gui_frame() !void {
 
                 const file = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
 
+
                 if (file != null) {
                     state.file = try std.mem.Allocator.dupeZ(gpa, u8, file.?);
                     state.images.len = 0;
                     _ = try pdf.init(state.file.?);
+
                 }
                 m.close();
             }
@@ -52,6 +55,7 @@ pub fn gui_frame() !void {
             _ = try dvui.menuItemLabel(@src(), "Dummy Super Long", .{}, .{ .expand = .horizontal });
         }
     }
+
     //var scroll_info: dvui.ScrollInfo = .{ .vertical = .given };
     //var scroll = try dvui.scrollArea(@src(), .{ .scroll_info = &scroll_info }, .{ .expand = .both });
     var scroll = try dvui.scrollArea(@src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000), .w = @floatFromInt(100000) } },);
@@ -89,4 +93,5 @@ pub fn gui_frame() !void {
             }
         }
     }
+
 }
