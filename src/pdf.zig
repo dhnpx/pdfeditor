@@ -75,11 +75,13 @@ pub fn initMultiple(files: ArrayList([:0]const u8)) !void {
     c.fz_set_error_callback(ctx, null, null);
     c.fz_set_warning_callback(ctx, null, null);
 
+    state.pages_total = @as(u16, @intCast(files.items.len));
     for (0..files.items.len) |i| {
         const doc = c.fz_open_document(ctx, files.items[i].ptr) orelse {
             std.debug.print("Failed to open document: {s}\n", .{c.fz_caught_message(ctx)});
             return e.DocumentError.FailedToOpenDocument;
         };
+        const keep = c.fz_keep_document(ctx, doc);
         errdefer c.fz_drop_document(ctx, doc);
         const colorspace = c.fz_device_rgb(ctx);
         const page = c.fz_load_page(ctx, doc, @as(u16, @intCast(i)));
@@ -89,7 +91,7 @@ pub fn initMultiple(files: ArrayList([:0]const u8)) !void {
         const width = c.fz_pixmap_width(ctx, pix);
         const height = c.fz_pixmap_height(ctx, pix);
         try state.images.append(gpa, .{
-            .doc = doc,
+            .doc = keep,
             .data = dvui.textureCreate(c.fz_pixmap_samples(ctx, pix), @as(u32, @intCast(width)), @as(u32, @intCast(height)), dvui.enums.TextureInterpolation.linear),
             .width = width,
             .height = height,

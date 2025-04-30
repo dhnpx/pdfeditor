@@ -28,9 +28,8 @@ pub fn gui_frame() !void {
                 const file = try dvui.dialogNativeFileOpen(dvui.currentWindow().arena(), .{ .title = "Pick file" });
 
                 if (file != null) {
-                    state.files.clearAndFree();
+                    state.clearState();
                     try state.files.append(file.?);
-                    state.textures.clearAndFree(gpa);
                     state.mode = state.Mode.pdf;
                     _ = try pdf.initSingle(state.files.items[0]);
                 }
@@ -39,7 +38,7 @@ pub fn gui_frame() !void {
             if (try dvui.menuItemLabel(@src(), "Open images", .{}, .{}) != null) {
                 const files = try dvui.dialogNativeFileOpenMultiple(dvui.currentWindow().arena(), .{ .title = "Open images" });
                 if (files.?.len != 0) {
-                    state.files.clearAndFree();
+                    state.clearState();
                     state.mode = state.Mode.images;
                     for (0..files.?.len) |i| {
                         try state.files.append(files.?[i]);

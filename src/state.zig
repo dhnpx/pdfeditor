@@ -33,3 +33,13 @@ pub const NonPdfImages = std.MultiArrayList(pdf.NonPdfImage);
 pub var images: NonPdfImages = NonPdfImages{};
 
 pub var mode: Mode = undefined;
+
+pub fn clearState() void {
+    doc = null;
+    ctx = null;
+    pages_total = 0;
+    page_current = 0;
+    files.clearRetainingCapacity();
+    textures.clearRetainingCapacity();
+    images.clearRetainingCapacity();
+}
