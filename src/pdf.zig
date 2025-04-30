@@ -39,8 +39,9 @@ pub fn init(file: [:0]const u8) !PdfImage {
 
         
     const page = c.fz_load_page(ctx, doc, state.page_number);
-    
-    const scale: f32 = 1.0;
+    const dpi: f32 = 288.0;
+    const scale: f32 = dpi / 72.0;
+    //const scale: f32 = 1.0;
     const ctm = c.fz_scale(scale, scale);
 
     const pix = c.fz_new_pixmap_from_page(ctx, page, ctm, c.fz_device_rgb(ctx), 1);
@@ -99,6 +100,23 @@ pub fn init(file: [:0]const u8) !PdfImage {
             const pix6 = c.fz_new_pixmap_from_page(ctx,page6,ctm,c.fz_device_rgb(ctx),1);
             const data6 = c.fz_pixmap_samples(ctx, pix6);
             state.loaded_texture6 = dvui.textureCreate(data6, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
+        }
+
+        if(i == 6){
+            const page7 = c.fz_load_page(ctx, doc, 6);
+            const pix7 = c.fz_new_pixmap_from_page(ctx,page7,ctm,c.fz_device_rgb(ctx),1);
+            const data7 = c.fz_pixmap_samples(ctx, pix7);
+            state.loaded_texture7 = dvui.textureCreate(data7, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
+            
+        }
+
+
+        if(i == 7){
+            const page7 = c.fz_load_page(ctx, doc, 7);
+            const pix7 = c.fz_new_pixmap_from_page(ctx,page7,ctm,c.fz_device_rgb(ctx),1);
+            const data7 = c.fz_pixmap_samples(ctx, pix7);
+            state.loaded_texture7 = dvui.textureCreate(data7, @intCast(width), @intCast(height), enums.TextureInterpolation.nearest);
             
         }
 

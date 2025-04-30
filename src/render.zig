@@ -58,7 +58,7 @@ pub fn gui_frame() !void {
 //    const fwidth2: f32 = @floatFromInt(width2);
 //    const height2: u32 = state.height + 10;
 //    const fheight2: f32 = @floatFromInt(height2);
-    var scroll = try dvui.scrollArea( @src(), .{ .vertical_bar = .show}, .{ .expand = .both, .min_size_content = .{ .h = @floatFromInt(100000) , .w = @floatFromInt(100000) } }, );
+    var scroll = try dvui.scrollArea( @src(), .{ .vertical_bar = .show}, .{ .expand = .ratio, .min_size_content = .{ .h = @floatFromInt(100000) , .w = @floatFromInt(100000) } }, );
     defer scroll.deinit();
     //var t12 = try dvui.textLayout(@src(), .{}, .{ .expand = .horizontal });
     //try t12.addText(
@@ -67,24 +67,26 @@ pub fn gui_frame() !void {
     //try t12.addText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", .{});   
     //t12.deinit();
     //var t12 = try dvui.texture
-    var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
+    //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = @floatFromInt(state.width), .h = @floatFromInt(state.height) }, },);
     
     //var pageBox = try dvui.box( @src(), .vertical, .{ .expand = .both, .min_size_content = .{ .w = fwidth2, .h = fheight2 }, },);
-    defer pageBox.deinit();
+    //defer pageBox.deinit();
     
         const drawRect = dvui.RectScale{ .r = .{
             .x = scroll.data().contentRect().x,
             .y = scroll.data().contentRect().y,
-            .w = @floatFromInt(state.width),
-            //.w = scroll.data().contentRect().w,
-            .h = @floatFromInt(state.height),
-        }, .s = state.scale_val};
+            //.w = @floatFromInt(state.height),
+            .w = scroll.data().contentRect().w,
+            //.h = @floatFromInt(state.height),
+            .h = scroll.data().contentRect().h,
+        //}, .s = state.scale_val};
+        }, .s = 4.0};
     
 
        
     // render texture maybe
     if (state.loaded_texture) |tex| {
-    std.debug.print("Ok now so like ok dude\n", .{});
+    //std.debug.print("Ok now so like ok dude\n", .{});
     
         var hbox = try dvui.box(@src(), .horizontal, .{});
         defer hbox.deinit();
@@ -117,6 +119,21 @@ pub fn gui_frame() !void {
                 if( state.current_page_number == 5){
                     state.loaded_texture = state.loaded_texture5;
                 }
+                if( state.current_page_number == 6){
+                    state.loaded_texture = state.loaded_texture6;
+                }
+
+
+                if( state.current_page_number == 7){
+                    state.loaded_texture = state.loaded_texture7;
+                }
+
+
+                if( state.current_page_number == 8){
+                    state.loaded_texture = state.loaded_texture8;
+                }
+
+
 
 
             }
@@ -153,6 +170,21 @@ pub fn gui_frame() !void {
                 if( state.current_page_number == 5){
                     state.loaded_texture = state.loaded_texture5;
                 }
+
+                if( state.current_page_number == 6){
+                    state.loaded_texture = state.loaded_texture6;
+                }
+
+
+                if( state.current_page_number == 7){
+                    state.loaded_texture = state.loaded_texture7;
+                }
+
+
+                if( state.current_page_number == 8){
+                    state.loaded_texture = state.loaded_texture8;
+                }
+
 
 
 

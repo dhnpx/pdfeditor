@@ -22,7 +22,6 @@ const gpa = gpa_instance.allocator();
 ///
 pub fn main() !void {
     std.log.info("SDL version: {}", .{Backend.getSDLVersion()});
-
     dvui.Examples.show_demo_window = state.show_demo;
 
     defer if (gpa_instance.deinit() != .ok) @panic("Memory leak on exit!");
